@@ -23,7 +23,7 @@ int main (int argc, char **argv) {
     while (1) {
         printf("US %li\n", now_us());
 
-        printf ("GRAPH %li\n", randr(0, 100));
+        printf ("GRAPH %i\n", randr(0, 100));
         usleep(10000);
     }
 

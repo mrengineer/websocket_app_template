@@ -2,7 +2,7 @@
 <meta charset="utf-8" /> 
 	
 <head>
-	<title>Swicheck</title>  
+	<title>UI for simple websocket console based app</title>  
 
 
 	<meta charset="utf-8">
@@ -19,25 +19,13 @@
 	var websocket;
 	var connection;
 
-	var g_magnitudes = null;
-	var g_variance = null;
-	var g_alg = null;
-
+	var g_graph = null;
 
 	//Series on drawing
-	var magnitudes 	= new TimeSeries();
-	var maxm 		= new TimeSeries();
-
-	var variance 	= new TimeSeries();
-	var maxv 		= new TimeSeries();
-
-	var alg 		= new TimeSeries();
+	var s_graph 	= new TimeSeries();
 
 	function init() {
 		connection 	= document.getElementById("connection");
-		output 		= document.getElementById("output");
-		variance_act = document.getElementById("variance_act");
-		magnitudes_act = document.getElementById("magnitudes_act");
 	
 		websocket = new ReconnectingWebSocket(wsUri);
 		websocket.reconnectInterval = 1000;
@@ -49,73 +37,33 @@
 	}
 
 	function onOpen(evt) { 
-		connection.innerHTML = "<span class=\"badge rounded-pill bg-success\">На связи</span>"; 
+		connection.innerHTML = "<span class=\"badge rounded-pill bg-success\">On-line</span>";
 		websocket.send("?");		
 	}
-	function onClose(evt) { connection.innerHTML = "<span class=\"badge rounded-pill bg-danger\">Нет соединения</span>"; }
+
+	function onClose(evt) { connection.innerHTML = "<span class=\"badge rounded-pill bg-danger\">Off-line</span>"; }
 	function onError(evt) {
-		connection.innerHTML = "<span class=\"badge rounded-pill bg-danger\">Нет соединения</span>"
+		connection.innerHTML = "<span class=\"badge rounded-pill bg-danger\">Off-line</span>"
 	}
 	function onMessage(message){
 		if (message.data == "") return;
 
 		try {
 			
-			args = String(message.data).split(" ");		
+			args = String(message.data).split(" ");
 				var el 		= null;
 				var el_id 	= args[0].toString().trim().toUpperCase();					
 
-				if (el_id == "MAGN") {
-					magnitudes.append(Date.now(), parseFloat(args[1].toString().trim()));
-					maxm.append(Date.now(), parseFloat(args[2].toString().trim()));
-					magnitudes_act.innerHTML =  parseFloat(args[1].toString().trim());
-				} else if (el_id == "VAR") {
-					variance.append(Date.now(), parseFloat(args[1].toString().trim()));					
-					maxv.append(Date.now(), parseFloat(args[2].toString().trim()));
-					variance_act.innerHTML =  parseFloat(args[1].toString().trim());					
-
-				} else if (el_id == "ALG") {
-					alg.append(Date.now(), parseFloat(args[1].toString().trim()));
-
+				if (el_id == "GRAPH") {
+					s_graph.append(Date.now(), parseFloat(args[1].toString().trim()));
 				} else if (el_id == "CONSOLE") {
 					el = document.getElementById(el_id);
-					//console.log(message.data);
 					el.innerHTML = message.data.toString().replace("CONSOLE", "").trim() + "<BR>" + el.innerHTML;
-				} else {
-					
+				} else {					
 					el = document.getElementById(el_id);
 					evalue = args[1].toString().trim();
 
-					//console.log(el_id + "=" + evalue);
-
-
-					if (el != null) el.innerHTML = evalue;
-					
-					if (el_id =="STATE") {
-						switch (parseInt(evalue)){
-							case 0:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-secondary\">Простой</span>"
-								break;
-							case 1:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-primary\">Настройка усиления</span>"
-								break;
-							case 2:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-primary\">Калибровка</span>"
-								break;
-							case 3:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-success text-dark\">Ожидание импульса</span>"
-								break;
-							case 4:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-success text-dark\">ИМПУЛЬС</span>"
-								break;
-							case 5:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-danger text-dark\">Сбой</span>"
-								break;				
-							default:
-								el.innerHTML = "<span class=\"badge rounded-pill bg-light text-dark\">Не определено</span>"
-								break;						
-						}
-					}
+					if (el != null) el.innerHTML = evalue;					
 				}			
 		} catch (error) {
 			console.error(error);
@@ -136,51 +84,20 @@
 </head>
 <body>
 
-		Соединение: <span id="connection"><span class="badge rounded-pill bg-danger">Нет соединения</span></span> 
+		Connection: <span id="connection"><span class="badge rounded-pill bg-danger">Нет соединения</span></span> 
 		<BR>
-		Состояние: <span id="STATE"><span class="badge rounded-pill bg-light text-dark">Не определено</span></span>
-		<HR>
-		Усиление канала 1: <span id="GAIN0">-</span> dBm
-		<BR>
-		Усиление канала 2: <span id="GAIN1">-</span> dBm
-		<HR> 
-		Максимум магнитуды: <span id="MAXM">-</span> актуальное <span id="magnitudes_act">-</span>
-		<BR>
-		Максимум дисперсии: <span id="MAXV">-</span> актуальное <span id="variance_act">-</span>
-		<BR>
-		Производительность: <span id="PERF">-</span> отсчетов/мс
-		<BR>
-		Детектировано импульсов: <span id="PULSES">0</span>
+		Datetime: <span id="US">-</span> uS
 
+		<canvas id="graph" width="500" height="350" style="width:100%;height:350px"></canvas>
 
-		<canvas id="graph_magnitudes" width="500" height="150" style="width:100%;height:150px"></canvas>
-		<canvas id="graph_variance" width="500" height="150" style="width:100%;height:150px"></canvas>
-		<canvas id="graph_alg" width="500" height="150" style="width:100%;height:150px"></canvas>
-		
 		<div id="CONSOLE"></div>
 
 		<script type="text/javascript">
-			function myYRangeFunction(range) {
-				var min = 0;
-				var max = range.max*1.05;
-				return {min: min, max: max};
-			}
 
-			var g_magnitudes = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', yRangeFunction:myYRangeFunction, fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 10 } });
-			g_magnitudes.addTimeSeries(maxm, { strokeStyle: 'rgb(0, 255, 0)', lineWidth: 2 });
-			g_magnitudes.addTimeSeries(magnitudes, { strokeStyle: 'rgb(0, 255, 0)', lineWidth: 1 });
+			var g_graph = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 10 } });
+			g_graph.addTimeSeries(s_graph, { strokeStyle: 'rgb(0, 255, 0)', lineWidth: 1 });
 
-
-			var g_variance = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 10 } });
-			g_variance.addTimeSeries(maxv, { strokeStyle: 'rgb(0, 0, 255)', lineWidth: 2 });
-			g_variance.addTimeSeries(variance, { strokeStyle: 'rgb(0, 0, 255)', lineWidth: 1 });
-			
-			var g_alg = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 4 } });
-			g_alg.addTimeSeries(alg, { strokeStyle: 'rgb(0, 0, 255)', lineWidth: 2 });
-
-			g_magnitudes.streamTo(document.getElementById("graph_magnitudes"), 600);
-			g_variance.streamTo(document.getElementById("graph_variance"), 600);
-			g_alg.streamTo(document.getElementById("graph_alg"), 600);
+			g_graph.streamTo(document.getElementById("graph"), 800);
 		  </script>
 
 </body>
