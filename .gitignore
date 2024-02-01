@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!LICENSE
+!*.md
+!*.js
+!*.html
+!CMakeLists.txt
+
+# files to be tracked are in subdirectories
+!*/src/*
+!include/*
+!*/.vscode/*
