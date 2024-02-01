@@ -67,6 +67,7 @@
     "stdio.h": "c",
     "stdbool.h": "c",
     "malloc.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "unistd.h": "c"
   }
 }

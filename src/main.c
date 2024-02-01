@@ -18,11 +18,25 @@ unsigned int randr(unsigned int min, unsigned int max){
     return (max - min +1)*scaled + min;
 }
 
+
+void set_term_quiet_input()
+{
+  struct termios tc;
+  tcgetattr(0, &tc);
+  tc.c_lflag &= ~(ICANON | ECHO);
+  tc.c_cc[VMIN] = 0;
+  tc.c_cc[VTIME] = 0;
+  tcsetattr(0, TCSANOW, &tc);
+}
+
 int main (int argc, char **argv) {
 
     char input[32];         //stdin input commands from websocketd
     input[0] = 0;
     char ch;
+
+    struct pollfd pfd = { .fd = 0, .events = POLLIN };
+    set_term_quiet_input();
 
     setbuf(stdout, NULL);   //Disable buffering on stdout by using or will be problem with sockets and output
 
@@ -35,18 +49,18 @@ int main (int argc, char **argv) {
 
         printf ("GRAPH %i\n", randr(0, 100));
 
-        int c = read(STDIN_FILENO, &ch, 1);
-        printf("%i\n", c);
-        while(read(STDIN_FILENO+1, &ch, 1) > 0) {
+
+        if (poll(&pfd, 1, 0)>0) {
+            int c = getchar();
+            //printf("Key pressed: %c \n", c);
+            ch = (char)c;
             if (ch == '\n') {
                 printf("CONSOLE input='%s'\n", input);
                 input[0] = 0;
             } else strncat(input, &ch, 1);
-        }
+        }        
 
-        printf("CONSOLE LOOP...\n");
-
-        usleep(100000);
+        usleep(10000);
     }
 
     return 0;

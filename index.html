@@ -30,6 +30,7 @@
 		websocket = new ReconnectingWebSocket(wsUri);
 		websocket.reconnectInterval = 1000;
 
+
 		websocket.onopen 	= function(evt) { onOpen(evt) }; 
 		websocket.onclose 	= function(evt) { onClose(evt) }; 
 		websocket.onmessage = function(evt) { onMessage(evt) }; 
@@ -38,7 +39,7 @@
 
 	function onOpen(evt) { 
 		connection.innerHTML = "<span class=\"badge rounded-pill bg-success\">On-line</span>";
-		websocket.send("?");		
+		websocket.send("?\n");
 	}
 
 	function onClose(evt) { connection.innerHTML = "<span class=\"badge rounded-pill bg-danger\">Off-line</span>"; }
@@ -74,10 +75,6 @@
 
 	function doSend(message) {	websocket.send(message); }
 
-	window.onload = function () {
-		
-	}
-
 	document.addEventListener("DOMContentLoaded", () => {init();});
 
 	</script>
@@ -90,14 +87,18 @@
 
 		<canvas id="graph" width="500" height="350" style="width:100%;height:350px"></canvas>
 
+		<button type="button" class="btn btn-outline-primary" id="test" onclick="doSend('TEST\n');">TEST</button>
+
 		<div id="CONSOLE"></div>
 
 		<script type="text/javascript">
-
 			var g_graph = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 10 } });
 			g_graph.addTimeSeries(s_graph, { strokeStyle: 'rgb(0, 255, 0)', lineWidth: 1 });
-
 			g_graph.streamTo(document.getElementById("graph"), 800);
+
+
+
+
 		  </script>
 
 </body>
