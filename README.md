@@ -1,8 +1,10 @@
 # Websocket linux application template
 Template for linux websocket application
 
-Use websocketd
+* Reconnect on brocken webcocket
+* Fast graph is supported (same author)
 
+Use websocketd
 
 sudo apt install websocketd
 
