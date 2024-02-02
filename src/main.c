@@ -19,8 +19,7 @@ unsigned int randr(unsigned int min, unsigned int max){
 }
 
 
-void set_term_quiet_input()
-{
+void set_term_quiet_input(){
   struct termios tc;
   tcgetattr(0, &tc);
   tc.c_lflag &= ~(ICANON | ECHO);
@@ -29,7 +28,7 @@ void set_term_quiet_input()
   tcsetattr(0, TCSANOW, &tc);
 }
 
-int main (int argc, char **argv) {
+int main (void){ //(int argc, char **argv) {
 
     char input[32];         //stdin input commands from websocketd
     input[0] = 0;
@@ -46,13 +45,11 @@ int main (int argc, char **argv) {
     while (1) {
 
         printf("US %li\n", now_us());
-
         printf ("GRAPH %i\n", randr(0, 100));
 
 
         if (poll(&pfd, 1, 0)>0) {
             int c = getchar();
-            //printf("Key pressed: %c \n", c);
             ch = (char)c;
             if (ch == '\n') {
                 printf("CONSOLE input='%s'\n", input);

@@ -60,7 +60,7 @@
 				} else if (el_id == "CONSOLE") {
 					el = document.getElementById(el_id);
 					el.innerHTML = message.data.toString().replace("CONSOLE", "").trim() + "<BR>" + el.innerHTML;
-				} else {					
+				} else {
 					el = document.getElementById(el_id);
 					evalue = args[1].toString().trim();
 
@@ -95,10 +95,6 @@
 			var g_graph = new SmoothieChart({ grid: { strokeStyle: 'rgb(025, 0, 0)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 200, verticalSections: 10 } });
 			g_graph.addTimeSeries(s_graph, { strokeStyle: 'rgb(0, 255, 0)', lineWidth: 1 });
 			g_graph.streamTo(document.getElementById("graph"), 800);
-
-
-
-
 		  </script>
 
 </body>
